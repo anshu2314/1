@@ -56,21 +56,34 @@ export class Bot {
     });
 
     this.client.on("messageCreate", async (message) => {
-      if (!message || !message.author || !message.content) return;
+      if (!message || !message.author) return;
       if (this.isCaptcha || this.isResting) return;
 
-      if (message.content.includes("Please tell us you're human") && message.content.includes(this.client.user?.id || "")) {
+      const content = message.content || "";
+      const embedTitle = message.embeds?.[0]?.title || "";
+      const embedDescription = message.embeds?.[0]?.description || "";
+
+      // 1. Detect Captcha
+      if (content.includes("Please tell us you're human") && content.includes(this.client.user?.id || "")) {
          this.handleCaptcha(message);
          return;
       }
 
-      if (message.author.id === "716390085896962058" && (message.content.includes("A new wild pokémon has appeared!") || (message.embeds.length > 0 && message.embeds[0].title?.includes("A new wild pokémon has appeared!")))) {
+      // 2. Detect Wild Pokemon Spawn (Pokétwo)
+      const isPoketwo = message.author.id === "716390085896962058";
+      const hasSpawnText = content.includes("A new wild pokémon has appeared!") || 
+                          embedTitle.includes("A new wild pokémon has appeared!") || 
+                          embedDescription.includes("A new wild pokémon has appeared!");
+
+      if (isPoketwo && hasSpawnText) {
          this.log("Wild pokemon appeared! Sending hint request...", "info");
          this.sendHint(message.channel.id);
       }
 
-      if (message.author.id === "1254602968938844171" && message.content.includes("Possible Pokémon")) {
-        const match = message.content.match(/Possible Pokémon: (.+)/);
+      // 3. Detect P2A Prediction
+      const isP2A = message.author.id === "1254602968938844171";
+      if (isP2A && content.includes("Possible Pokémon")) {
+        const match = content.match(/Possible Pokémon: (.+)/);
         if (match) {
             const names = match[1].split(",").map(n => n.trim());
             this.log(`P2A Predicted: ${names.join(", ")}`, "info");
@@ -78,8 +91,9 @@ export class Bot {
         }
       }
 
-      if (message.author.id === "716390085896962058" && message.content.includes("Congratulations") && message.content.includes(this.client.user?.id || "")) {
-         const caughtMatch = message.content.match(/You caught a level \d+ (.+)!/i);
+      // 4. Detect Successful Catch
+      if (isPoketwo && content.includes("Congratulations") && content.includes(this.client.user?.id || "")) {
+         const caughtMatch = content.match(/You caught a level \d+ (.+)!/i);
          const pokemonName = caughtMatch ? caughtMatch[1] : "Unknown";
          
          this.log(`Caught ${pokemonName}!`, "success");
@@ -96,12 +110,13 @@ export class Bot {
          await storage.updateAccount(this.account.id, updates);
       }
 
-      if (message.author.id === "716390085896962058" && message.content.includes("These colors seem unusual")) {
+      if (isPoketwo && content.includes("These colors seem unusual")) {
          this.log(`Caught a SHINY!`, "success");
          await storage.updateAccount(this.account.id, { totalShiny: (this.account.totalShiny || 0) + 1 });
       }
 
-      if (message.author.id === "716390085896962058" && (message as any).components && (message as any).components.length > 0) {
+      // 5. Handle Buttons (Auto-click Confirm)
+      if (isPoketwo && (message as any).components && (message as any).components.length > 0) {
           for (const row of (message as any).components) {
               for (const component of row.components) {
                   if (component.type === 'BUTTON' && component.label?.toLowerCase() === 'confirm') {
@@ -112,8 +127,9 @@ export class Bot {
           }
       }
 
-      if (message.content.includes("You received") && message.content.includes("Pokécoins")) {
-         const match = message.content.match(/You received ([\d,]+) Pokécoins/);
+      // 6. Balance/Coins
+      if (content.includes("You received") && content.includes("Pokécoins")) {
+         const match = content.match(/You received ([\d,]+) Pokécoins/);
          if (match) {
              const coins = parseInt(match[1].replace(/,/g, ""));
              await storage.updateAccount(this.account.id, { totalCoins: (this.account.totalCoins || 0) + coins });
@@ -124,11 +140,14 @@ export class Bot {
     this.client.on("messageReactionAdd", async (reaction, user) => {
         if (user.id === "716390085896962058" && (reaction.emoji.name === "⌛" || reaction.emoji.name === "⏳")) {
             const message = reaction.message;
-            if (message.author?.id === this.client.user?.id && message.content?.includes("h")) {
-                this.log("Hint cooldown detected, waiting 8 seconds...", "warning");
+            const authorId = message.author?.id;
+            const content = message.content || "";
+            
+            if (authorId === this.client.user?.id && content.includes("h")) {
+                this.log("Hint cooldown detected, retrying in 5 seconds...", "warning");
                 setTimeout(() => {
                     this.sendHint(message.channel.id);
-                }, 8000);
+                }, 5000);
             }
         }
     });
@@ -144,7 +163,8 @@ export class Bot {
   private async handleCaptcha(message: any) {
     this.isCaptcha = true;
     this.stopSpam();
-    const match = message.content.match(/(https?:\/\/[^\s]+)/);
+    const content = message.content || "";
+    const match = content.match(/(https?:\/\/[^\s]+)/);
     const url = match ? match[0] : "Check Discord";
     this.log(`CAPTCHA DETECTED! ${url}`, "error");
     await storage.updateAccount(this.account.id, { status: "captcha", captchaUrl: url });
@@ -157,8 +177,8 @@ export class Bot {
       for (let i = 0; i < names.length; i++) {
           const name = names[i];
           setTimeout(() => {
-              if (this.isCaptcha || this.isResting) return;
-              (channel as any).send(`<@716390085896962058> c ${name}`);
+              if (this.isCaptcha || this.isResting || !this.client.isReady()) return;
+              (channel as any).send(`<@716390085896962058> c ${name}`).catch((e: any) => console.error("Catch error", e));
           }, i * 5000);
       }
   }
@@ -168,7 +188,7 @@ export class Bot {
     if (!this.account.spamChannelId) return;
 
     this.spamInterval = setInterval(() => {
-       if (this.isCaptcha || this.isResting) return;
+       if (this.isCaptcha || this.isResting || !this.client.isReady()) return;
        const channel = this.client.channels.cache.get(this.account.spamChannelId);
        if (channel && channel.isText()) {
            const randomWord = Math.random().toString(36).substring(7);
