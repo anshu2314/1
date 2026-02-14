@@ -116,18 +116,26 @@ export function AccountCard({ account }: { account: Account }) {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-2 mb-6">
-          <div className="bg-black/30 p-2 rounded border border-white/5 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase">Total</p>
-            <p className="text-lg font-bold font-data text-white">{account.totalCaught}</p>
+        <div className="grid grid-cols-5 gap-1 mb-6">
+          <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">
+            <p className="text-[9px] text-muted-foreground uppercase">Total</p>
+            <p className="text-sm font-bold font-data text-white">{account.totalCaught}</p>
           </div>
-          <div className="bg-black/30 p-2 rounded border border-white/5 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase">Shiny</p>
-            <p className="text-lg font-bold font-data text-yellow-400">{account.totalShiny}</p>
+          <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">
+            <p className="text-[9px] text-muted-foreground uppercase">Shiny</p>
+            <p className="text-sm font-bold font-data text-yellow-400">{account.totalShiny}</p>
           </div>
-          <div className="bg-black/30 p-2 rounded border border-white/5 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase">Coins</p>
-            <p className="text-lg font-bold font-data text-secondary">{account.totalCoins}</p>
+          <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">
+            <p className="text-[9px] text-muted-foreground uppercase">Leg</p>
+            <p className="text-sm font-bold font-data text-purple-400">{account.totalLegendary}</p>
+          </div>
+          <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">
+            <p className="text-[9px] text-muted-foreground uppercase">Myth</p>
+            <p className="text-sm font-bold font-data text-pink-400">{account.totalMythical}</p>
+          </div>
+          <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">
+            <p className="text-[9px] text-muted-foreground uppercase">Norm</p>
+            <p className="text-sm font-bold font-data text-blue-400">{account.totalNormal}</p>
           </div>
         </div>
 

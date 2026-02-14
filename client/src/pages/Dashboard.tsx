@@ -27,6 +27,7 @@ export default function Dashboard() {
   const runningCount = accounts?.filter(a => a.status === "running").length || 0;
   const captchaCount = accounts?.filter(a => a.status === "captcha").length || 0;
   const totalCaught = accounts?.reduce((acc, curr) => acc + curr.totalCaught, 0) || 0;
+  const totalShiny = accounts?.reduce((acc, curr) => acc + curr.totalShiny, 0) || 0;
   const totalCoins = accounts?.reduce((acc, curr) => acc + curr.totalCoins, 0) || 0;
 
   return (
@@ -51,11 +52,10 @@ export default function Dashboard() {
             color="green" 
           />
           <StatsCard 
-            title="Captcha Alerts" 
-            value={captchaCount} 
+            title="Shiny Found" 
+            value={totalShiny} 
             icon={<Shield className="w-6 h-6" />} 
-            color={captchaCount > 0 ? "red" : "primary"}
-            trend={captchaCount > 0 ? "ACTION REQ" : "SECURE"}
+            color="accent"
           />
           <StatsCard 
             title="Total Catches" 
