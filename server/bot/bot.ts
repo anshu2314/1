@@ -1,10 +1,9 @@
-import { Client, MessageActionRow, MessageButton } from "discord.js-selfbot-v13";
+import { Client } from "discord.js-selfbot-v13";
 import { type Account, type InsertLog } from "@shared/schema";
 import { storage } from "../storage";
 import fs from "fs";
 import path from "path";
 
-// Load data once
 const DATA_DIR = path.join(process.cwd(), "attached_assets");
 
 function loadList(filename: string): string[] {
@@ -29,13 +28,12 @@ export class Bot {
   private restTimeout: NodeJS.Timeout | null = null;
   private isResting: boolean = false;
   private isCaptcha: boolean = false;
-  private hintInProgress: boolean = false;
   
   constructor(account: Account) {
     this.account = account;
     this.client = new Client({
       checkUpdate: false,
-    });
+    } as any);
     
     this.setupEvents();
   }
@@ -58,25 +56,19 @@ export class Bot {
     });
 
     this.client.on("messageCreate", async (message) => {
+      if (!message || !message.author || !message.content) return;
       if (this.isCaptcha || this.isResting) return;
 
-      // 1. Detect Captcha
       if (message.content.includes("Please tell us you're human") && message.content.includes(this.client.user?.id || "")) {
          this.handleCaptcha(message);
          return;
       }
 
-      // 2. Detect Wild Pokemon (Pokétwo)
       if (message.author.id === "716390085896962058" && (message.content.includes("A new wild pokémon has appeared!") || (message.embeds.length > 0 && message.embeds[0].title?.includes("A new wild pokémon has appeared!")))) {
          this.log("Wild pokemon appeared! Sending hint request...", "info");
          this.sendHint(message.channel.id);
       }
 
-      // 3. Detect Cooldown Reaction on Hint
-      // Note: We need messageReactionAdd for this, but if the bot is the one waiting, we check content or reactions
-      // The prompt says "if getting reaction of cooldown on hint cmd msg then wait 8 sec and use again hint"
-      
-      // 4. Detect P2A prediction
       if (message.author.id === "1254602968938844171" && message.content.includes("Possible Pokémon")) {
         const match = message.content.match(/Possible Pokémon: (.+)/);
         if (match) {
@@ -86,7 +78,6 @@ export class Bot {
         }
       }
 
-      // 5. Detect Successful Catch
       if (message.author.id === "716390085896962058" && message.content.includes("Congratulations") && message.content.includes(this.client.user?.id || "")) {
          const caughtMatch = message.content.match(/You caught a level \d+ (.+)!/i);
          const pokemonName = caughtMatch ? caughtMatch[1] : "Unknown";
@@ -110,20 +101,17 @@ export class Bot {
          await storage.updateAccount(this.account.id, { totalShiny: (this.account.totalShiny || 0) + 1 });
       }
 
-      // 6. Handle Buttons (Auto-click Confirm)
-      if (message.author.id === "716390085896962058" && message.components.length > 0) {
-          for (const row of message.components) {
+      if (message.author.id === "716390085896962058" && (message as any).components && (message as any).components.length > 0) {
+          for (const row of (message as any).components) {
               for (const component of row.components) {
                   if (component.type === 'BUTTON' && component.label?.toLowerCase() === 'confirm') {
                       this.log("Clicking Confirm button...", "info");
-                      // @ts-ignore - selfbot click implementation
-                      await message.clickButton(component.customId);
+                      await (message as any).clickButton(component.customId);
                   }
               }
           }
       }
 
-      // 7. Balance/Coins
       if (message.content.includes("You received") && message.content.includes("Pokécoins")) {
          const match = message.content.match(/You received ([\d,]+) Pokécoins/);
          if (match) {
@@ -134,9 +122,9 @@ export class Bot {
     });
 
     this.client.on("messageReactionAdd", async (reaction, user) => {
-        if (user.id === "716390085896962058" && reaction.emoji.name === "⌛") {
+        if (user.id === "716390085896962058" && (reaction.emoji.name === "⌛" || reaction.emoji.name === "⏳")) {
             const message = reaction.message;
-            if (message.author.id === this.client.user?.id && message.content.includes("h")) {
+            if (message.author?.id === this.client.user?.id && message.content?.includes("h")) {
                 this.log("Hint cooldown detected, waiting 8 seconds...", "warning");
                 setTimeout(() => {
                     this.sendHint(message.channel.id);
@@ -149,8 +137,7 @@ export class Bot {
   private sendHint(channelId: string) {
       const channel = this.client.channels.cache.get(channelId);
       if (channel && channel.isText()) {
-          // @ts-ignore
-          channel.send("<@716390085896962058> h").catch(e => console.error("Hint error", e));
+          (channel as any).send("<@716390085896962058> h").catch((e: any) => console.error("Hint error", e));
       }
   }
 
@@ -171,9 +158,8 @@ export class Bot {
           const name = names[i];
           setTimeout(() => {
               if (this.isCaptcha || this.isResting) return;
-              // @ts-ignore
-              channel.send(`<@716390085896962058> c ${name}`);
-          }, i * 5000); // Try all every 5s if multiple
+              (channel as any).send(`<@716390085896962058> c ${name}`);
+          }, i * 5000);
       }
   }
 
@@ -186,8 +172,7 @@ export class Bot {
        const channel = this.client.channels.cache.get(this.account.spamChannelId);
        if (channel && channel.isText()) {
            const randomWord = Math.random().toString(36).substring(7);
-           // @ts-ignore
-           channel.send(randomWord).catch(e => console.error("Spam error", e));
+           (channel as any).send(randomWord).catch((e: any) => console.error("Spam error", e));
        }
     }, this.account.spamSpeed);
   }
@@ -242,21 +227,17 @@ export class Bot {
       if (!channel || !channel.isText()) return false;
 
       if (type === "say") {
-          // @ts-ignore
-          await channel.send(payload);
+          await (channel as any).send(payload);
           return true;
       }
       
       if (type === "market_buy") {
-          // @ts-ignore
-          await channel.send(`<@716390085896962058> m b ${payload}`);
+          await (channel as any).send(`<@716390085896962058> m b ${payload}`);
           return true;
       }
 
       if (type === "click") {
-          // Custom click command from dashboard
           this.log(`Manual click requested for ${payload}`, "info");
-          // This would require searching messages for buttons, simplified here
           return true;
       }
 

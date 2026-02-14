@@ -41,15 +41,6 @@ export const logs = pgTable("logs", {
 // Schemas
 export const insertAccountSchema = createInsertSchema(accounts).omit({ 
   id: true, 
-  status: true, 
-  totalCaught: true, 
-  totalCoins: true, 
-  totalShiny: true, 
-  totalLegendary: true, 
-  totalMythical: true, 
-  totalNormal: true,
-  balance: true,
-  captchaUrl: true, 
   lastActive: true, 
   createdAt: true 
 });
