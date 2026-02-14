@@ -1,7 +1,9 @@
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { botManager } from "./bot/manager";
 
 const app = express();
 const httpServer = createServer(app);
@@ -52,6 +54,10 @@ app.use((req, res, next) => {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
 
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
       log(logLine);
     }
   });
@@ -60,6 +66,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Restore bots before starting server
+  await botManager.restoreBots();
+
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
