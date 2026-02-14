@@ -1,5 +1,5 @@
-
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -21,6 +21,7 @@ export const accounts = pgTable("accounts", {
   totalShiny: integer("total_shiny").default(0).notNull(),
   totalLegendary: integer("total_legendary").default(0).notNull(),
   totalMythical: integer("total_mythical").default(0).notNull(),
+  totalNormal: integer("total_normal").default(0).notNull(),
   balance: integer("balance").default(0).notNull(),
   
   // Internal state
@@ -46,6 +47,7 @@ export const insertAccountSchema = createInsertSchema(accounts).omit({
   totalShiny: true, 
   totalLegendary: true, 
   totalMythical: true, 
+  totalNormal: true,
   balance: true,
   captchaUrl: true, 
   lastActive: true, 
