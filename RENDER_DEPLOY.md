@@ -10,18 +10,19 @@ To deploy this application on Render, follow these steps:
 - **Repository:** Connect your GitHub/GitLab repository.
 - **Runtime:** `Node`.
 - **Build Command:** `npm install && npm run build`
-- **Start Command:** `npm run db:push && npm start`
+- **Start Command:** `npm run db:push --force && npm start`
 
 ## 3. Environment Variables
 Add the following variables in the Render dashboard:
 - `DATABASE_URL`: `postgres://avnadmin:...@...:19216/defaultdb?sslmode=require`
 - `NODE_ENV`: `production`
-- `PORT`: `10000` (Render's default)
 - `SESSION_SECRET`: A random secure string for session management.
+- `PORT`: `10000`
 
 ## 4. Troubleshooting
+- **Build Errors:** If you see `sh: 1: tsx: not found`, ensure `tsx` is in the `dependencies` section of `package.json`, not just `devDependencies`.
 - **Bot Not Catching:** Ensure the `token` provided for each account is a valid Discord user token and that the bot has access to the configured `catch_channel_id`.
-- **Database Errors:** Verify that the Aiven database allows connections from Render's IP range or is set to allow all (development only).
+- **Database Errors:** Verify that the Aiven database allows connections from Render's IP range.
 
 ## Features
 - **Spammer:** Random word spamming with adjustable speed.
