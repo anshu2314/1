@@ -66,6 +66,10 @@ export class Bot {
             if (!message || !message.author) return;
             if (this.isCaptcha || this.isResting) return;
 
+            // CRITICAL: Only process messages in the configured catch channel or spam channel
+            const allowedChannels = [this.account.catchChannelId, this.account.spamChannelId].filter(Boolean);
+            if (!allowedChannels.includes(message.channel.id)) return;
+
             const content = message.content || "";
             const embed = message.embeds?.[0];
             const embedTitle = embed?.title || "";
