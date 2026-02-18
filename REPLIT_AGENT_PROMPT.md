@@ -24,7 +24,11 @@ Build a Discord Pokétwo Catcher Dashboard with the following architecture and f
 ### 3. Deployment Configuration (`render.yaml`)
 - **Build Command:** `npm install && npm run build`
 - **Start Command:** `npx drizzle-kit push --force && node dist/index.cjs`
-- **Required Env Vars:** `DATABASE_URL` (with `sslmode=require`), `SESSION_SECRET`, `NODE_ENV=production`.
+- **Required Env Vars:** 
+    - `DATABASE_URL`: Your Aiven connection string.
+    - `NODE_TLS_REJECT_UNAUTHORIZED`: Set to `0` to allow Aiven's self-signed certificates.
+    - `SESSION_SECRET`: A long random string.
+    - `NODE_ENV`: `production`.
 
 ### 4. Safety & Performance
 - No duplicate catches.
