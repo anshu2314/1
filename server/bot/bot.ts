@@ -21,6 +21,19 @@ function loadList(filename: string): string[] {
 
 const LEGENDARY = loadList("legendary_1771090707829.txt");
 const MYTHICAL = loadList("mythical_1771090707829.txt");
+const ALL_POKEMON = loadList("pokemon_1771090707830.txt");
+
+function solveHint(hint: string): string[] {
+    // The pokémon is _a__le _yc__za_. -> ^.a..le .yc..za.$
+    const pattern = hint
+        .replace("The pokémon is ", "")
+        .replace(/\./g, "")
+        .replace(/_/g, ".")
+        .trim();
+    
+    const regex = new RegExp(`^${pattern}$`, "i");
+    return ALL_POKEMON.filter(name => regex.test(name));
+}
 
 export class Bot {
     public client: Client;
@@ -86,6 +99,27 @@ export class Bot {
 
             // 2. Detect Wild Pokemon Spawn (Pokétwo)
             const isPoketwo = message.author.id === "716390085896962058";
+
+            // Detect Hint
+            if (isPoketwo && content.includes("The pokémon is")) {
+                const names = solveHint(content);
+                if (names.length > 0) {
+                    this.log(`Hint solved: ${names.join(", ")}`, "info");
+                    names.forEach((name, index) => {
+                        setTimeout(() => {
+                            if (this.isCaptcha || this.isResting || !this.client.isReady()) return;
+                            const channel = this.client.channels.cache.get(message.channel.id);
+                            if (channel && channel.isText()) {
+                                (channel as any).send(`<@716390085896962058> c ${name}`)
+                                    .catch((e: any) => console.error("Catch error", e));
+                            }
+                        }, index * 2000);
+                    });
+                } else {
+                    this.log("Could not solve hint from database", "warning");
+                }
+                return;
+            }
 
             // Check for spawn text in content or any part of the embed
             let hasSpawnText = content.includes(
