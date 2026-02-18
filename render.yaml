@@ -2,16 +2,14 @@ services:
   - type: web
     name: poketwo-catcher
     runtime: node
-    buildCommand: npm install && npx tsx script/build.ts
-    startCommand: npx drizzle-kit push --force && node dist/index.cjs
+    buildCommand: npm install && npm run build
+    startCommand: npx drizzle-kit push --force && npm run start
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: poketwo-db
       - key: NODE_ENV
         value: production
-      - key: NODE_TLS_REJECT_UNAUTHORIZED
-        value: "0"
       - key: SESSION_SECRET
         generateValue: true
       - key: PORT
