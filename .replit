@@ -37,3 +37,8 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[userenv]
+
+[userenv.shared]
+DATABASE_URL = "postgres://avnadmin:AVNS_TKZcP1aOOzoNgkQRN0Q@pg-14697c73-top258391-47d4.h.aivencloud.com:27607/defaultdb?sslmode=require"

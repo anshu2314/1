@@ -135,18 +135,43 @@ export class Bot {
                 this.sendHint(message.channel.id);
             }
 
-            // 3. Detect P2A Prediction
+            // 3. Detect P2A Prediction (854233015475109888)
             const isP2A = message.author.id === "854233015475109888";
             if (isP2A && content.includes("Possible Pokémon")) {
                 const match = content.match(/Possible Pokémon: (.+)/);
                 if (match) {
                     const names = match[1].split(",").map((n) => n.trim());
                     this.log(`P2A Predicted: ${names.join(", ")}`, "info");
-                    this.catchPokemon(message.channel.id, names);
+                    // Delay each catch by 6 seconds for multiple names
+                    names.forEach((name, index) => {
+                        setTimeout(() => {
+                            if (this.isCaptcha || this.isResting || !this.client.isReady()) return;
+                            const channel = this.client.channels.cache.get(message.channel.id);
+                            if (channel && channel.isText()) {
+                                (channel as any).send(`<@716390085896962058> c ${name}`)
+                                    .catch((e: any) => console.error("Catch error", e));
+                            }
+                        }, index * 6000);
+                    });
                 }
             }
 
-            // 4. Detect Successful Catch
+            // 4. Detect Sierra Prediction (696161886734909481)
+            const isSierra = message.author.id === "696161886734909481";
+            if (isSierra && message.embeds && message.embeds.length > 0) {
+                const sierraEmbed = message.embeds[0];
+                const pokemonName = sierraEmbed.title || sierraEmbed.description?.split("\n")[0];
+                if (pokemonName && !pokemonName.includes(" ")) {
+                    this.log(`Sierra Predicted: ${pokemonName}`, "info");
+                    const channel = this.client.channels.cache.get(message.channel.id);
+                    if (channel && channel.isText()) {
+                        (channel as any).send(`<@716390085896962058> c ${pokemonName}`)
+                            .catch((e: any) => console.error("Sierra catch error", e));
+                    }
+                }
+            }
+
+            // 5. Detect Successful Catch
             if (
                 isPoketwo &&
                 content.includes("Congratulations") &&
@@ -427,12 +452,12 @@ export class Bot {
         if (!channel || !channel.isText()) return false;
 
         if (type === "say") {
-            await (channel as any).send(payload);
+            (channel as any).send(payload).catch((e: any) => console.error("Say error", e));
             return true;
         }
 
         if (type === "market_buy") {
-            await (channel as any).send(`<@716390085896962058> m b ${payload}`);
+            (channel as any).send(`<@716390085896962058> m b ${payload}`).catch((e: any) => console.error("Market error", e));
             return true;
         }
 
