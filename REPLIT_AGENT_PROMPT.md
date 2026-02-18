@@ -22,13 +22,14 @@ Build a Discord Pokétwo Catcher Dashboard with the following architecture and f
 - **Live Logs:** Real-time event streaming for all bot actions.
 
 ### 3. Deployment Configuration (`render.yaml`)
-- **Build Command:** `npm install && npm run build`
+- **Build Command:** `npm install && npx tsx script/build.ts`
 - **Start Command:** `npx drizzle-kit push --force && node dist/index.cjs`
 - **Required Env Vars:** 
     - `DATABASE_URL`: Your Aiven connection string.
     - `NODE_TLS_REJECT_UNAUTHORIZED`: Set to `0` to allow Aiven's self-signed certificates.
     - `SESSION_SECRET`: A long random string.
     - `NODE_ENV`: `production`.
+    - `PORT`: Set to `10000`.
 
 ### 4. Safety & Performance
 - No duplicate catches.
