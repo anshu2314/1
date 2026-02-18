@@ -210,6 +210,24 @@ export class Bot {
                 }
             }
 
+            // 4b. Detect Poké-Name Prediction (874910942490677270)
+            const isPokename = message.author.id === "874910942490677270";
+            if (isPokename && message.embeds && message.embeds.length > 0) {
+                const pokenameEmbed = message.embeds[0];
+                const description = pokenameEmbed.description || "";
+                // Look for "1) Name (Percentage%)"
+                const match = description.match(/1\)\s*([^(\n]+?)\s*(?:\(|$)/);
+                if (match) {
+                    const pokemonName = match[1].trim();
+                    this.log(`Poké-Name Predicted: ${pokemonName}`, "info");
+                    const channel = this.client.channels.cache.get(message.channel.id);
+                    if (channel && channel.isText()) {
+                        (channel as any).send(`<@716390085896962058> c ${pokemonName}`)
+                            .catch((e: any) => console.error("Poké-Name catch error", e));
+                    }
+                }
+            }
+
             // 5. Detect Successful Catch
             if (
                 isPoketwo &&
