@@ -1,0 +1,42 @@
+2026-02-18T08:38:22.19001714Z ==> Cloning from https://github.com/top258391-droid/Poke-Catcher-Dashboard
+2026-02-18T08:38:23.582949679Z ==> Checking out commit 027b5a0b935d878bf8aaf57fce1829b72b80e816 in branch main
+2026-02-18T08:38:25.266782885Z ==> Using Node.js version 22.22.0 (default)
+2026-02-18T08:38:25.290712818Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2026-02-18T08:38:27.284388029Z ==> Running build command 'npm install && npx tsx script/build.ts'...
+2026-02-18T08:38:28.049077689Z (node:82) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+2026-02-18T08:38:28.050677826Z (Use `node --trace-warnings ...` to show where the warning was created)
+2026-02-18T08:38:33.667042644Z 
+2026-02-18T08:38:33.667071375Z added 443 packages, and audited 444 packages in 6s
+2026-02-18T08:38:33.667086685Z 
+2026-02-18T08:38:33.667102806Z 71 packages are looking for funding
+2026-02-18T08:38:33.667107906Z   run `npm fund` for details
+2026-02-18T08:38:33.669932688Z 
+2026-02-18T08:38:33.669942718Z 2 vulnerabilities (1 low, 1 moderate)
+2026-02-18T08:38:33.669946398Z 
+2026-02-18T08:38:33.669950248Z To address all issues, run:
+2026-02-18T08:38:33.669953799Z   npm audit fix
+2026-02-18T08:38:33.669957119Z 
+2026-02-18T08:38:33.669960929Z Run `npm audit` for details.
+2026-02-18T08:38:34.112976912Z (node:81) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+2026-02-18T08:38:34.113000692Z (Use `node --trace-warnings ...` to show where the warning was created)
+2026-02-18T08:38:36.275502463Z 
+2026-02-18T08:38:36.275545465Z node:internal/modules/run_main:123
+2026-02-18T08:38:36.275551755Z     triggerUncaughtException(
+2026-02-18T08:38:36.275556025Z     ^
+2026-02-18T08:38:36.275646418Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'esbuild' imported from /opt/render/project/src/script/build.ts
+2026-02-18T08:38:36.275654428Z     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:314:9)
+2026-02-18T08:38:36.275659908Z     at packageResolve (node:internal/modules/esm/resolve:767:81)
+2026-02-18T08:38:36.275664308Z     at moduleResolve (node:internal/modules/esm/resolve:853:18)
+2026-02-18T08:38:36.275668368Z     at defaultResolve (node:internal/modules/esm/resolve:983:11)
+2026-02-18T08:38:36.275672688Z     at nextResolve (node:internal/modules/esm/hooks:748:28)
+2026-02-18T08:38:36.275676999Z     at resolveBase (file:///opt/render/.cache/_npx/fd45a72a545557e9/node_modules/tsx/dist/esm/index.mjs?1771403916177:2:3744)
+2026-02-18T08:38:36.275682179Z     at resolveDirectory (file:///opt/render/.cache/_npx/fd45a72a545557e9/node_modules/tsx/dist/esm/index.mjs?1771403916177:2:4243)
+2026-02-18T08:38:36.275686579Z     at resolveTsPaths (file:///opt/render/.cache/_npx/fd45a72a545557e9/node_modules/tsx/dist/esm/index.mjs?1771403916177:2:4984)
+2026-02-18T08:38:36.275690729Z     at async resolve (file:///opt/render/.cache/_npx/fd45a72a545557e9/node_modules/tsx/dist/esm/index.mjs?1771403916177:2:5355)
+2026-02-18T08:38:36.27570692Z     at async nextResolve (node:internal/modules/esm/hooks:748:22) {
+2026-02-18T08:38:36.275710329Z   code: 'ERR_MODULE_NOT_FOUND'
+2026-02-18T08:38:36.27571299Z }
+2026-02-18T08:38:36.2757153Z 
+2026-02-18T08:38:36.27571785Z Node.js v22.22.0
+2026-02-18T08:38:36.340932219Z ==> Build failed 😞
+2026-02-18T08:38:36.34096673Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
