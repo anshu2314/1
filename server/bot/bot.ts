@@ -122,11 +122,16 @@ export class Bot {
             }
 
             if (isPoketwo && hasSpawnText) {
-                this.log(
-                    "Wild pokemon appeared! Sending hint request...",
-                    "info",
-                );
-                this.sendHint(message.channel.id);
+                // Ensure we only hint if P2A or Sierra haven't already predicted it
+                // We'll wait 2 seconds before hinting to give other bots a chance
+                setTimeout(() => {
+                    if (this.isCaptcha || this.isResting) return;
+                    this.log(
+                        "Wild pokemon appeared! Sending hint request...",
+                        "info",
+                    );
+                    this.sendHint(message.channel.id);
+                }, 2000);
             }
 
             // Detect "That is the wrong pokémon!"
