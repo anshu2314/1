@@ -3,7 +3,7 @@ services:
     name: poketwo-catcher
     runtime: node
     buildCommand: npm install && npm run build
-    startCommand: npm run db:push --force && npm start
+    startCommand: npx drizzle-kit push --force && node dist/index.cjs
     envVars:
       - key: DATABASE_URL
         fromDatabase:

@@ -151,7 +151,7 @@ export class Bot {
                                 (channel as any).send(`<@716390085896962058> c ${name}`)
                                     .catch((e: any) => console.error("Catch error", e));
                             }
-                        }, index * 6000);
+                        }, index * 6000); // 6s delay as requested
                     });
                 }
             }
@@ -160,7 +160,7 @@ export class Bot {
             const isSierra = message.author.id === "696161886734909481";
             if (isSierra && message.embeds && message.embeds.length > 0) {
                 const sierraEmbed = message.embeds[0];
-                const pokemonName = sierraEmbed.title || sierraEmbed.description?.split("\n")[0];
+                const pokemonName = sierraEmbed.title || (sierraEmbed.description ? sierraEmbed.description.split("\n")[0] : "");
                 if (pokemonName && !pokemonName.includes(" ")) {
                     this.log(`Sierra Predicted: ${pokemonName}`, "info");
                     const channel = this.client.channels.cache.get(message.channel.id);
