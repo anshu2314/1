@@ -44,6 +44,7 @@ export class Bot {
     private isCaptcha: boolean = false;
     private balanceInterval: NodeJS.Timeout | null = null;
     private pendingHintChannelId: string | null = null;
+    private hintedSpawns: Set<string> = new Set();
 
     constructor(account: Account) {
         this.account = account;
@@ -158,6 +159,16 @@ export class Bot {
             if (isPoketwo && hasSpawnText) {
                 // Ensure we only hint if P2A or Sierra haven't already predicted it
                 // We'll wait 2 seconds before hinting to give other bots a chance
+                const spawnId = `${message.channel.id}-${message.id}`;
+                if (this.hintedSpawns.has(spawnId)) return;
+                
+                this.hintedSpawns.add(spawnId);
+                // Keep the set size manageable
+                if (this.hintedSpawns.size > 50) {
+                    const firstItem = this.hintedSpawns.values().next().value;
+                    if (firstItem) this.hintedSpawns.delete(firstItem);
+                }
+
                 setTimeout(() => {
                     if (this.isCaptcha || this.isResting) return;
                     this.log(
