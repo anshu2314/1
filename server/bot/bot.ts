@@ -45,6 +45,7 @@ export class Bot {
     private balanceInterval: NodeJS.Timeout | null = null;
     private pendingHintChannelId: string | null = null;
     private hintedSpawns: Set<string> = new Set();
+    private activeSpawns: Map<string, string> = new Map(); // channelId -> spawnMessageId
 
     constructor(account: Account) {
         this.account = account;
@@ -157,20 +158,24 @@ export class Bot {
             }
 
             if (isPoketwo && hasSpawnText) {
-                // Ensure we only hint if P2A or Sierra haven't already predicted it
-                // We'll wait 2 seconds before hinting to give other bots a chance
                 const spawnId = `${message.channel.id}-${message.id}`;
                 if (this.hintedSpawns.has(spawnId)) return;
                 
                 this.hintedSpawns.add(spawnId);
-                // Keep the set size manageable
+                this.activeSpawns.set(message.channel.id, message.id);
+
+                // Keep the sets manageable
                 if (this.hintedSpawns.size > 50) {
                     const firstItem = this.hintedSpawns.values().next().value;
                     if (firstItem) this.hintedSpawns.delete(firstItem);
                 }
 
                 setTimeout(() => {
-                    if (this.isCaptcha || this.isResting) return;
+                    if (this.isCaptcha || this.isResting || !this.client.isReady()) return;
+                    
+                    // Only send hint if this is still the most recent spawn in this channel
+                    if (this.activeSpawns.get(message.channel.id) !== message.id) return;
+
                     this.log(
                         "Wild pokemon appeared! Sending hint request...",
                         "info",
@@ -245,6 +250,9 @@ export class Bot {
                 content.includes("Congratulations") &&
                 content.includes(this.client.user?.id || "")
             ) {
+                // Clear active spawn on catch
+                this.activeSpawns.delete(message.channel.id);
+
                 const caughtMatch = content.match(
                     /You caught a level \d+ (.+)!/i,
                 );
@@ -525,4 +533,3 @@ export class Bot {
         this.log("Resumed manually.", "success");
     }
 }
-
