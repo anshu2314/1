@@ -179,10 +179,7 @@ export class Bot {
                 }, 2000);
             }
 
-            // Detect "That is the wrong pokémon!"
-            if (isPoketwo && content.includes("That is the wrong pokémon!")) {
-                this.log("Wrong pokemon guessed, retrying hint...", "warning");
-                this.sendHint(message.channel.id);
+            
             }
 
             // 3. Detect P2A Prediction (854233015475109888)
