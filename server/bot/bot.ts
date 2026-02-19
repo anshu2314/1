@@ -179,7 +179,10 @@ export class Bot {
                 }, 2000);
             }
 
-            
+            // Detect "That is the wrong pokémon!"
+            if (isPoketwo && content.includes("That is the wrong pokémon!")) {
+                this.log("Wrong pokemon guessed.", "warning");
+                // Removed auto-hint retry on wrong guess
             }
 
             // 3. Detect P2A Prediction (854233015475109888)
@@ -335,29 +338,7 @@ export class Bot {
         });
 
         this.client.on("messageReactionAdd", async (reaction, user) => {
-            if (
-                user.id === "716390085896962058" &&
-                (reaction.emoji.name === "⌛" || reaction.emoji.name === "⏳")
-            ) {
-                const message = reaction.message;
-                const authorId = message.author?.id;
-                const content = message.content || "";
-
-                if (
-                    authorId === this.client.user?.id &&
-                    content.includes("h")
-                ) {
-                    this.log(
-                        "Hint cooldown detected, retrying in 5 seconds...",
-                        "warning",
-                    );
-                    setTimeout(() => {
-                        if (this.pendingHintChannelId) {
-                            this.sendHint(this.pendingHintChannelId);
-                        }
-                    }, 5000);
-                }
-            }
+            // Logic removed to prevent hint retries
         });
     }
 
@@ -544,3 +525,4 @@ export class Bot {
         this.log("Resumed manually.", "success");
     }
 }
+
