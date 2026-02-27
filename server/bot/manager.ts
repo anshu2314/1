@@ -19,7 +19,7 @@ class BotManager {
   async stopBot(accountId: number) {
     const bot = this.bots.get(accountId);
     if (bot) {
-      bot.stop();
+      await bot.stop();
       this.bots.delete(accountId);
     }
   }
@@ -42,7 +42,7 @@ class BotManager {
   async resumeAfterCaptcha(accountId: number) {
       const bot = this.bots.get(accountId);
       if (bot) {
-          bot.resume();
+          await bot.resume();
       }
   }
 
