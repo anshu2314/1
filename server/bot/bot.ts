@@ -74,7 +74,7 @@ export class Bot {
             this.startSpam();
             this.startRestCycle();
             this.startBalanceCycle();
-            storage.updateAccount(this.account.id, { status: "running" });
+            storage.updateAccount(this.account.id, { status: "running" }).catch((e: any) => console.error("Failed to update account status:", e));
         });
 
         this.client.on("messageCreate", async (message) => {
@@ -95,7 +95,7 @@ export class Bot {
                 content.includes("Please tell us you're human") &&
                 content.includes(this.client.user?.id || "")
             ) {
-                this.handleCaptcha(message);
+                await this.handleCaptcha(message);
                 return;
             }
 
@@ -418,11 +418,11 @@ export class Bot {
         if (this.balanceInterval) clearInterval(this.balanceInterval);
 
         // Initial balance check
-        setTimeout(() => this.checkBalance(), 5000);
+        setTimeout(() => this.checkBalance().catch(err => console.error("Balance check failed:", err)), 5000);
 
         this.balanceInterval = setInterval(
             () => {
-                this.checkBalance();
+                this.checkBalance().catch(err => console.error("Balance check failed:", err));
             },
             10 * 60 * 1000,
         ); // 10 minutes
@@ -433,7 +433,7 @@ export class Bot {
         this.balanceInterval = null;
     }
 
-    private checkBalance() {
+    private async checkBalance() {
         if (this.isCaptcha || this.isResting || !this.client.isReady()) return;
 
         const channelId =
@@ -441,7 +441,7 @@ export class Bot {
         const channel = this.client.channels.cache.get(channelId);
 
         if (channel && channel.isText()) {
-            this.log("Checking balance...", "info");
+            await this.log("Checking balance...", "info");
             (channel as any)
                 .send("<@716390085896962058> bal")
                 .catch((e: any) => console.error("Balance check error", e));
@@ -450,17 +450,17 @@ export class Bot {
 
     private startRestCycle() {
         this.restTimeout = setTimeout(
-            () => {
+            async () => {
                 this.isResting = true;
                 this.stopSpam();
-                this.log("Resting for 10 minutes...", "warning");
-                storage.updateAccount(this.account.id, { status: "resting" });
+                await this.log("Resting for 10 minutes...", "warning");
+                await storage.updateAccount(this.account.id, { status: "resting" });
 
                 setTimeout(
-                    () => {
+                    async () => {
                         this.isResting = false;
-                        this.log("Resuming work.", "info");
-                        storage.updateAccount(this.account.id, {
+                        await this.log("Resuming work.", "info");
+                        await storage.updateAccount(this.account.id, {
                             status: "running",
                         });
                         this.startSpam();
@@ -483,11 +483,16 @@ export class Bot {
         }
     }
 
-    public stop() {
+    public async stop() {
         this.stopSpam();
+        this.stopBalanceCycle();
         if (this.restTimeout) clearTimeout(this.restTimeout);
-        this.client.destroy();
-        this.log("Bot stopped.", "info");
+        try {
+            this.client.destroy();
+        } catch (error) {
+            console.error("Error destroying client:", error);
+        }
+        await this.log("Bot stopped.", "info");
     }
 
     public async updateConfig(account: Account) {
@@ -523,13 +528,13 @@ export class Bot {
         return false;
     }
 
-    public resume() {
+    public async resume() {
         this.isCaptcha = false;
-        storage.updateAccount(this.account.id, {
+        await storage.updateAccount(this.account.id, {
             status: "running",
             captchaUrl: null,
         });
         this.startSpam();
-        this.log("Resumed manually.", "success");
+        await this.log("Resumed manually.", "success");
     }
 }
