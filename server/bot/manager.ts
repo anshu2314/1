@@ -12,8 +12,14 @@ class BotManager {
     }
 
     const bot = new Bot(account);
-    await bot.start();
     this.bots.set(account.id, bot);
+
+    try {
+      await bot.start();
+    } catch (e) {
+      this.bots.delete(account.id);
+      throw e;
+    }
   }
 
   async stopBot(accountId: number) {
