@@ -51,6 +51,9 @@ export class Bot {
         this.account = account;
         this.client = new Client({
             checkUpdate: false,
+            patchVoice: true,
+            autoRedeemNitro: false,
+            syncStatus: false,
         } as any);
 
         this.setupEvents();
@@ -394,6 +397,8 @@ export class Bot {
         if (this.spamInterval) clearInterval(this.spamInterval);
         if (!this.account.spamChannelId) return;
 
+        const speed = this.account.spamSpeed && this.account.spamSpeed > 0 ? this.account.spamSpeed : 2000;
+
         this.spamInterval = setInterval(() => {
             if (this.isCaptcha || this.isResting || !this.client.isReady())
                 return;
@@ -406,7 +411,7 @@ export class Bot {
                     .send(randomWord)
                     .catch((e: any) => console.error("Spam error", e));
             }
-        }, this.account.spamSpeed);
+        }, speed);
     }
 
     private stopSpam() {
